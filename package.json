@@ -1,10 +1,10 @@
 {
-    "name": "RepMultiplier",
-    "version": "1.0.0",
+    "name": "repmultiplier",
+    "version": "1.0.1",
     "main": "src/mod.js",
     "license": "MIT",
     "author": "Mattdokn",
-    "akiVersion": "~3.7",
+    "akiVersion": "~3.8",
 	"loadBefore": [],
 	"loadAfter": [],
 	"incompatibilities": [],

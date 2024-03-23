@@ -16,6 +16,9 @@ class RepMultiplier implements IPostAkiLoadMod
 
         const questTable = databaseServer.getTables().templates.quests;
 
+        let questCounter = 0;
+        let negativeQuestCounter = 0;
+
         // Iterate over all traders
         for (const questId in questTable)
         {
@@ -27,12 +30,23 @@ class RepMultiplier implements IPostAkiLoadMod
                 const reward = questRewards[rewardIdx];
                 if (reward.type == QuestRewardType.TRADER_STANDING)
                 {
-                    const prevValue = reward.value;
-                    // round this to nearest 1/100th?
-                    reward.value = Number(reward.value) * Number(this.modConfig['multiplier'])
-                    logger.log(`[RepMultiplier] Quest ${quest.QuestName} rep went from ${prevValue} to ${reward.value}`, LogTextColor.WHITE);
+                    const prevValue = Number(reward.value);
+                    if (prevValue < 0.0 && !this.modConfig["apply_to_negative_rep"])
+                    {
+                        negativeQuestCounter++;
+                        continue;
+                    }
+                    // round this to nearest 1/100th
+                    reward.value = Math.ceil(prevValue * Number(this.modConfig["multiplier"]) * 100) / 100;
+                    questCounter++;
                 }
             }
+        }
+
+        logger.log(`[RepMultiplier] ${questCounter} quests were modified.`, LogTextColor.WHITE);
+        if (!this.modConfig["apply_to_negative_rep"]) 
+        {
+            logger.log(`[RepMultiplier] Skipped over ${negativeQuestCounter} negative rep quest "rewards"`, LogTextColor.WHITE);
         }
     }
 }
