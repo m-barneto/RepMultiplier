@@ -10,16 +10,39 @@ class RepMultiplier implements IPostAkiLoadMod
 {
     private modConfig = require("../config/config.json");
 
-    public postAkiLoad(container: DependencyContainer): void {
+    public postAkiLoad(container: DependencyContainer): void 
+    {
         const databaseServer = container.resolve<DatabaseServer>("DatabaseServer");
         const logger = container.resolve<ILogger>("WinstonLogger");
+
+        const traderTable = databaseServer.getTables().traders;
+
+        // Iterate over all traders
+        for (const traderId in traderTable)
+        {
+            const trader = traderTable[traderId];
+            const nickname = trader.base.nickname;
+
+            // Unknown, BTR, and caretaker are excluded
+            if (nickname === "caretaker" || nickname === "Unknown" || nickname === "БТР") continue;
+            
+            // Modify trader loyalty levels to reflect their new currency
+            for (const loyaltyLevelId in trader.base.loyaltyLevels)
+            {
+                trader.base.loyaltyLevels[loyaltyLevelId].minSalesSum *= this.modConfig.min_sales_multiplier;
+            }
+            
+            logger.log(`[RepMultiplier] Multiplied trader min sales amount for ${nickname}.`, LogTextColor.WHITE);
+        }
+        
+        
 
         const questTable = databaseServer.getTables().templates.quests;
 
         let questCounter = 0;
         let negativeQuestCounter = 0;
 
-        // Iterate over all traders
+        // Iterate over all quests
         for (const questId in questTable)
         {
             const quest = questTable[questId];
